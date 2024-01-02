@@ -1,5 +1,18 @@
 import numpy as np
+import math
 
+def rotate(point, theta, ax):
+    p = point.copy()
+    if ax == "x":
+        p[1] = point[1]*math.cos(theta) - point[2]*math.sin(theta)
+        p[2] = point[1]*math.sin(theta) + point[2]*math.cos(theta)
+    elif ax == "y":
+        p[0] = point[0]*math.cos(theta) + point[2]*math.sin(theta)
+        p[2] = -point[0]*math.sin(theta) + point[2]*math.cos(theta)
+    else:
+        p[0] = point[0]*math.cos(theta) - point[1]*math.sin(theta)
+        p[1] = point[0]*math.sin(theta) + point[1]*math.cos(theta)
+    return p
 
 def getRotationMatrix(angles):
     tX = angles[0]  # 旋转角度X（单位：度）
@@ -14,7 +27,8 @@ def getRotationMatrix(angles):
     Rz = np.array([[np.cos(np.radians(tZ)), -np.sin(np.radians(tZ)), 0],
                    [np.sin(np.radians(tZ)), np.cos(np.radians(tZ)), 0],
                    [0, 0, 1]])
-    return np.dot(Rx, np.dot(Ry, Rz))
+
+    return np.dot(np.dot(Rx, Ry), Rz)
 
 
 def get3dCoodinate(cube):
@@ -30,9 +44,23 @@ def get3dCoodinate(cube):
         [lwh[0], lwh[1], lwh[2]],
         [0, lwh[1], lwh[2]]
     ]).astype(float)
+
+    # 中心移动到原点，便于旋转
+    v[:, 0] -= lwh[0]/2
+    v[:, 1] -= lwh[1]/2
+    v[:, 2] -= lwh[2]/2
+
     # 根据旋转和平移计算世界坐标
     r = getRotationMatrix(cube.angles)
-    return np.dot(v, r.T)
+    v = np.dot(v, r.T)
+
+    # 移动回原位
+    v[:, 0] += lwh[0]/2
+    v[:, 1] += lwh[1]/2
+    v[:, 2] += lwh[2]/2
+
+    v = v + np.array(cube.disp)
+    return v
 
 
 def getK1(f):
@@ -89,3 +117,31 @@ def ifCube():
         print("这个六面体是长方体")
     else:
         print("这个六面体不是长方体")
+
+def count11():
+    points = np.array([
+        [0.0072, 0.0072],
+        [0.00648646, 0.00663976],
+        [0.00637317, 0.00622619],
+        [0.00703689, 0.00672461],
+        [0.00702993, 0.00737099],
+        [0.00634362, 0.00681151],
+        [0.00624036, 0.00639734],
+        [0.00688021, 0.00689636]
+    ])
+
+    # 初始化一个空的字典来存储边的长度
+    edge_lengths = {}
+
+    # 计算每一对点之间的边的长度
+    for i in range(len(points)):
+        for j in range(i + 1, len(points)):
+            point1 = points[i]
+            point2 = points[j]
+            distance = np.linalg.norm(point1 - point2)  # 计算欧几里德距离
+            edge_lengths[(i, j)] = distance
+
+    # 打印每一对点之间的边的长度
+    for edge, length in edge_lengths.items():
+        point1_idx, point2_idx = edge
+        print(f"边 ({point1_idx}, {point2_idx}) 的长度为: {length:.6f}")
