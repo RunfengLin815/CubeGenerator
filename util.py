@@ -1,19 +1,49 @@
 import numpy as np
 import math
+from args import *
+
+
+def getCubes(places, lwhs, angles):
+    cubes = []
+    for i in range(len(places)):
+        cubes.append(Cube(angles[i], places[i], lwhs[i]))
+
+    return cubes
+
+
+def getCubesVs(cubes):
+    vs = []
+    for cube in cubes:
+        vs.append(get3dCoodinate(cube))
+    return vs
+
+
+def getHs(vs):
+    vhs = []
+    for v in vs:
+        vhs.append(getH(v))
+    return vhs
+
+
+def getH(v):
+    return np.hstack((v, np.ones((v.shape[0], 1))))
+
 
 def rotate(point, theta, ax):
     p = point.copy()
     if ax == "x":
-        p[1] = point[1]*math.cos(theta) - point[2]*math.sin(theta)
-        p[2] = point[1]*math.sin(theta) + point[2]*math.cos(theta)
+        p[1] = point[1] * math.cos(theta) - point[2] * math.sin(theta)
+        p[2] = point[1] * math.sin(theta) + point[2] * math.cos(theta)
     elif ax == "y":
-        p[0] = point[0]*math.cos(theta) + point[2]*math.sin(theta)
-        p[2] = -point[0]*math.sin(theta) + point[2]*math.cos(theta)
+        p[0] = point[0] * math.cos(theta) + point[2] * math.sin(theta)
+        p[2] = -point[0] * math.sin(theta) + point[2] * math.cos(theta)
     else:
-        p[0] = point[0]*math.cos(theta) - point[1]*math.sin(theta)
-        p[1] = point[0]*math.sin(theta) + point[1]*math.cos(theta)
+        p[0] = point[0] * math.cos(theta) - point[1] * math.sin(theta)
+        p[1] = point[0] * math.sin(theta) + point[1] * math.cos(theta)
     return p
 
+
+# XYZ Euler
 def getRotationMatrix(angles):
     tX = angles[0]  # 旋转角度X（单位：度）
     tY = angles[1]  # 旋转角度Y（单位：度）
@@ -31,6 +61,27 @@ def getRotationMatrix(angles):
     return np.dot(np.dot(Rx, Ry), Rz)
 
 
+def doEulerRotate(v, angles):
+    tX = angles[0]  # 旋转角度X（单位：度）
+    tY = angles[1]  # 旋转角度Y（单位：度）
+    tZ = angles[2]  # 旋转角度Z（单位：度）
+    Rx = np.array([[1, 0, 0],
+                   [0, np.cos(np.radians(tX)), -np.sin(np.radians(tX))],
+                   [0, np.sin(np.radians(tX)), np.cos(np.radians(tX))]])
+    Ry = np.array([[np.cos(np.radians(tY)), 0, np.sin(np.radians(tY))],
+                   [0, 1, 0],
+                   [-np.sin(np.radians(tY)), 0, np.cos(np.radians(tY))]])
+    Rz = np.array([[np.cos(np.radians(tZ)), -np.sin(np.radians(tZ)), 0],
+                   [np.sin(np.radians(tZ)), np.cos(np.radians(tZ)), 0],
+                   [0, 0, 1]])
+
+    vx = np.dot(v, Rx.T)
+    vy = np.dot(vx, Ry.T)
+    vz = np.dot(vy, Rz.T)
+
+    return vz
+
+
 def get3dCoodinate(cube):
     # 根据尺寸获取原始三维坐标
     lwh = cube.lwh
@@ -46,20 +97,33 @@ def get3dCoodinate(cube):
     ]).astype(float)
 
     # 中心移动到原点，便于旋转
-    v[:, 0] -= lwh[0]/2
-    v[:, 1] -= lwh[1]/2
-    v[:, 2] -= lwh[2]/2
+    v[:, 0] -= lwh[0] / 2
+    v[:, 1] -= lwh[1] / 2
+    v[:, 2] -= lwh[2] / 2
 
     # 根据旋转和平移计算世界坐标
     r = getRotationMatrix(cube.angles)
     v = np.dot(v, r.T)
 
-    # 移动回原位
-    v[:, 0] += lwh[0]/2
-    v[:, 1] += lwh[1]/2
-    v[:, 2] += lwh[2]/2
+    # 平移，模拟放置
+    for p in v:
+        p[0] += cube.disp[0]
+        p[1] += cube.disp[1]
+        p[2] += cube.disp[2]
 
-    v = v + np.array(cube.disp)
+    # 移动回原位
+    v[:, 0] += lwh[0] / 2
+    v[:, 1] += lwh[1] / 2
+    v[:, 2] += lwh[2] / 2
+
+    # v = v + np.array(cube.disp)
+    # # 先平移物体
+    # v = v + np.array(cube.disp)
+    #
+    # # 修改旋转逻辑，用欧拉角
+    # v_e = doEulerRotate(v, cube.angles)
+    # v = v_e
+
     return v
 
 
@@ -72,6 +136,55 @@ def getK1(f):
 def getK2(dx, dy):
     return np.array([[1 / dx, 0],
                      [0, 1 / dy]])
+
+
+# def getRT():
+
+def getTrans1(r, t):
+    if isinstance(r, np.ndarray):
+        pass
+    else:
+        r = np.array(r)
+    if isinstance(t, np.ndarray):
+        pass
+    else:
+        t = np.array(t)
+    t = t.reshape((t.shape[0], 1))
+    tr = np.hstack((r, t))
+    tr = np.vstack((tr, np.array([0, 0, 0, 1])))
+    return tr
+
+
+def getTrans2BK(camera):
+    dx = camera.sensor[0] / camera.reso[0]
+    dy = camera.sensor[1] / camera.reso[1]
+    fx = camera.f_len / dx
+    fy = camera.f_len / dy
+    u0 = camera.reso[0] / 2
+    v0 = camera.reso[1] / 2
+
+    trans2 = np.array([[fx, 0, -u0, 0],
+                       [0, fy, -v0, 0],
+                       [0, 0, 1, 0]]).astype(float)
+
+    return trans2
+
+
+def getTrans2(camera):
+    f = camera.f_len
+    return np.array([[f, 0, 0, 0],
+                     [0, f, 0, 0],
+                     [0, 0, 1, 0]]).astype(float)
+
+
+def getTrans3(camera):
+    u0 = camera.reso[0] / 2
+    v0 = camera.reso[1] / 2
+    dx1 = camera.reso[0] / camera.sensor[0]
+    dy1 = camera.reso[1] / camera.sensor[1]
+    return np.array([[dx1, 0, u0],
+                     [0, dy1, v0],
+                     [0, 0, 1]]).astype(float)
 
 
 
@@ -117,6 +230,7 @@ def ifCube():
         print("这个六面体是长方体")
     else:
         print("这个六面体不是长方体")
+
 
 def count11():
     points = np.array([

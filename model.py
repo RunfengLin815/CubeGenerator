@@ -5,6 +5,44 @@ import args
 from util import getK1, getK2
 
 
+def fromCamera2Voxel(vs_c, trans2):
+    vs_v = []
+    for v_c in vs_c:
+        vs = _fromCamera2Voxel(v_c, trans2)
+        vs = vs[:, :] / vs[:, 2:]
+        vs_v.append(vs[:, :2])
+
+    return vs_v
+
+
+def _fromCamera2Voxel(v_c, trans2):
+    return np.dot(v_c, trans2.T)
+
+
+def fromWorld2CameraV2(vs_w, trans1):
+    vc_h = []
+    for v_w in vs_w:
+        vc_h.append(_fromWorld2CameraV2(v_w, trans1))
+    return vc_h
+
+
+def _fromWorld2CameraV2(v_w, trans1):
+    return np.dot(v_w, trans1.T)
+
+
+def fromCamera2Img(vs_c, trans2):
+    vs_i = []
+    for v_c in vs_c:
+        vi = _fromCamera2Img(v_c, trans2)
+        vi = vi[:, :] / vi[:, 2:]
+        vs_i.append(vi[:, :2])
+    return vs_i
+
+
+def _fromCamera2Img(v_c, trans2):
+    return np.dot(v_c, trans2.T)
+
+
 def fromWorld2Camera(v_w, r, t):
     # 类型转换
     if isinstance(t, np.ndarray):
@@ -33,7 +71,7 @@ def fromWorld2Camera(v_w, r, t):
 
 
 
-def fromCamera2Img(v_c, f):
+def fromCamera2ImgBK(v_c, f):
     # [3, 4]
     # k1 = getK1(f)
     # v_c = np.hstack((v_c, np.ones((v_c.shape[0], 1))))
