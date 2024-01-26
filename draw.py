@@ -12,20 +12,41 @@ edges = [
 
 def draw2dscene(cubes, name, size, lim=None):
     fig = plt.figure(figsize=(size[0], size[1]))
-    ax = fig.add_subplot(111)
-
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_title('Cube Projection')
-    # todo 写成ax的形式
+    plt.xlabel('u')
+    plt.ylabel('v')
+    if lim:
+        plt.xlim([lim[0], lim[1]])
+        plt.ylim([lim[2], lim[3]])
+    plt.title(name)
     for v in cubes:
         for edge in edges:
             edge_x = [v[i, 0] for i in edge]
             edge_y = [v[i, 1] for i in edge]
-            ax.plot([edge_x[0], edge_y[0]], [edge_x[1], edge_y[1]], 'k-')
+            plt.plot(edge_x, edge_y, 'r')
 
     plt.show()
 
+
+def drawWorldScene(cubes, name, size, lim, view=None):
+    fig = plt.figure(figsize=(size[0], size[1]))
+    ax = fig.add_subplot(111, projection='3d')
+    if view:
+        ax.view_init(elev=view[0], azim=view[1])
+
+    plt.title(name)
+
+    if lim:
+        ax.set_xlim([lim[0], lim[1]])
+        ax.set_ylim([lim[0], lim[1]])
+        ax.set_zlim([lim[0], lim[1]])
+
+    for i_c in range(len(cubes)):
+        for connection in edges:
+            x1, y1, z1, _ = cubes[i_c][connection[0]]
+            x2, y2, z2, _ = cubes[i_c][connection[1]]
+            ax.plot3D([x1, x2], [y1, y2], [z1, z2], c='r', linewidth=2)
+
+    plt.show()
 
 def draw3dscene(cubes, name, size, lim, view=None, camera=None):
     fig = plt.figure(figsize=(size[0], size[1]))

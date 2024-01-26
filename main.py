@@ -49,7 +49,7 @@ if __name__ == "__main__":
     vs = getCubesVs(cubes)
     print(vs)
 
-    # draw3dscene(vs, "world scene", plot_size, [0, 1], views[0], camera)
+    draw3dscene(vs, "world scene", plot_size, [0, 1], views[0], camera)
 
     # 相机坐标
     vs_h = getHs(vs)
@@ -61,6 +61,8 @@ if __name__ == "__main__":
     vs_c = fromWorld2CameraV2(vs_h, trans1)
     print("vs_c:\n", vs_c)
 
+    drawWorldScene(vs_c, "camera scene", plot_size, [0, 1], views[0])
+
     # 图像坐标
     trans2 = getTrans2(camera)
     print("trans2:\n", trans2)
@@ -68,7 +70,7 @@ if __name__ == "__main__":
     vs_i = fromCamera2Img(vs_c, trans2)
     print("vs_i:\n", vs_i)
 
-    draw2dscene(vs_i, "test", plot_size)
+    draw2dscene(vs_i, "test", plot_size, lim=[0, 0.1, 0, 0.1])
 
 
     # 图像、像素一步到位
