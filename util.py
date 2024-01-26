@@ -3,6 +3,23 @@ import math
 from args import *
 
 
+def getReverseRotate(angles):
+    tX = -angles[0]  # 旋转角度X（单位：度）
+    tY = -angles[1]  # 旋转角度Y（单位：度）
+    tZ = -angles[2]  # 旋转角度Z（单位：度）
+    Rx = np.array([[1, 0, 0],
+                   [0, np.cos(np.radians(tX)), -np.sin(np.radians(tX))],
+                   [0, np.sin(np.radians(tX)), np.cos(np.radians(tX))]])
+    Ry = np.array([[np.cos(np.radians(tY)), 0, np.sin(np.radians(tY))],
+                   [0, 1, 0],
+                   [-np.sin(np.radians(tY)), 0, np.cos(np.radians(tY))]])
+    Rz = np.array([[np.cos(np.radians(tZ)), -np.sin(np.radians(tZ)), 0],
+                   [np.sin(np.radians(tZ)), np.cos(np.radians(tZ)), 0],
+                   [0, 0, 1]])
+
+    return np.dot(np.dot(Rz, Ry), Rx)
+
+
 def getCubes(places, lwhs, angles):
     cubes = []
     for i in range(len(places)):
@@ -140,17 +157,25 @@ def getK2(dx, dy):
 
 # def getRT():
 
-def getTrans1(r, t):
+def getTrans1(r, c):
     if isinstance(r, np.ndarray):
         pass
     else:
         r = np.array(r)
-    if isinstance(t, np.ndarray):
+    if isinstance(c, np.ndarray):
         pass
     else:
-        t = np.array(t)
-    t = t.reshape((t.shape[0], 1))
-    tr = np.hstack((r, t))
+        c = np.array(c)
+    c = c.reshape((c.shape[0], 1))
+
+    # for i in range(len(t)):
+    #     t[i, 0] = -t[i, 0]
+    # 计算位移
+    # t=-RC
+    t = np.dot(r, c)
+    t1 = -t
+
+    tr = np.hstack((r, t1))
     tr = np.vstack((tr, np.array([0, 0, 0, 1])))
     return tr
 

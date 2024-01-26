@@ -40,6 +40,15 @@ def drawWorldScene(cubes, name, size, lim, view=None):
         ax.set_ylim([lim[0], lim[1]])
         ax.set_zlim([lim[0], lim[1]])
 
+    # 坐标轴箭头
+    arrow_length = 1.0  # 箭头长度
+    arrow_colors = ['r', 'g', 'b']  # 箭头颜色，对应xyz
+    for i in range(3):
+        arrow_direction = np.zeros(3)
+        arrow_direction[i] = arrow_length
+        ax.quiver(0, 0, 0, arrow_direction[0], arrow_direction[1], arrow_direction[2],
+                  color=arrow_colors[i], arrow_length_ratio=0.1)
+
     for i_c in range(len(cubes)):
         for connection in edges:
             x1, y1, z1, _ = cubes[i_c][connection[0]]

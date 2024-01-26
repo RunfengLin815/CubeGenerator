@@ -39,7 +39,10 @@ if __name__ == "__main__":
 
     # 设置相机位置、角度、焦距、分辨率
     camera_place = [1, 1, 0.5]
+    # camera_place = [0.001, 0.001, 0.001]
     camera_angle = [90, -45, 0]
+    # camera_angle = [0, 0, 0]
+    # camera_angle = [90, 0, 0]
     camera = Camera(0.0036, [0.0036, 0.0024], [1920, 1080], camera_angle, camera_place)
 
     # 物体对象
@@ -47,21 +50,23 @@ if __name__ == "__main__":
 
     # 世界坐标
     vs = getCubesVs(cubes)
-    print(vs)
+    print("vs:\n", vs)
 
     draw3dscene(vs, "world scene", plot_size, [0, 1], views[0], camera)
 
     # 相机坐标
     vs_h = getHs(vs)
-    print(vs_h)
+    print("vs_h:\n", vs_h)
 
-    trans1 = getTrans1(getRotationMatrix(camera_angle), camera_place)
+    rt = getReverseRotate(camera_angle)
+    # rt = getRotationMatrix(camera_angle)
+    trans1 = getTrans1(rt, camera_place)
     print("trans1:\n", trans1)
 
     vs_c = fromWorld2CameraV2(vs_h, trans1)
     print("vs_c:\n", vs_c)
 
-    drawWorldScene(vs_c, "camera scene", plot_size, [0, 1], views[0])
+    drawWorldScene(vs_c, "camera scene", plot_size, [-1, 1], views[0])
 
     # 图像坐标
     trans2 = getTrans2(camera)
@@ -70,7 +75,8 @@ if __name__ == "__main__":
     vs_i = fromCamera2Img(vs_c, trans2)
     print("vs_i:\n", vs_i)
 
-    draw2dscene(vs_i, "test", plot_size, lim=[0, 0.1, 0, 0.1])
+    limit_2d = [-0.002, 0.002, -0.002, 0.002]
+    draw2dscene(vs_i, "test", plot_size, lim=limit_2d)
 
 
     # 图像、像素一步到位
@@ -80,8 +86,6 @@ if __name__ == "__main__":
     # vs_v = fromCamera2Voxel(vs_c, trans2)
     # print("vs_v:\n", vs_v)
     # # draw2dscene(vs_v, "voxel scene", [0, 1920, 0, 1080])
-
-
 
 
     # # 世界
