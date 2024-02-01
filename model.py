@@ -5,6 +5,19 @@ import args
 from util import getK1, getK2
 
 
+# def fromImg2Voxel(vs_i, trans3):
+#     vs_v = []
+#     for v_i in vs_i:
+#         vs = _fromCamera2Voxel(v_i, trans3)
+#         vs = vs[:, :] / vs[:, 2:]
+#         vs_v.append(vs[:, :2])
+#
+#     return vs_v
+#
+# def _fromImg2Voxel(v_i, trans3):
+#     return np.dot(v_i, trans3.T)
+
+
 def fromCamera2Voxel(vs_c, trans2):
     vs_v = []
     for v_c in vs_c:

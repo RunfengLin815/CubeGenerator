@@ -188,8 +188,8 @@ def getTrans2BK(camera):
     u0 = camera.reso[0] / 2
     v0 = camera.reso[1] / 2
 
-    trans2 = np.array([[fx, 0, -u0, 0],
-                       [0, fy, -v0, 0],
+    trans2 = np.array([[fx, 0, u0, 0],
+                       [0, fy, v0, 0],
                        [0, 0, 1, 0]]).astype(float)
 
     return trans2

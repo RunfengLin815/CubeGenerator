@@ -27,6 +27,10 @@ def draw2dscene(cubes, name, size, lim=None):
     plt.show()
 
 
+# def drawWorldSceneByScenes(cubes, name, size, lim, views):
+#     for view in views:
+#         drawWorldScene(cubes, name, size, lim, view)
+
 def drawWorldScene(cubes, name, size, lim, view=None):
     fig = plt.figure(figsize=(size[0], size[1]))
     ax = fig.add_subplot(111, projection='3d')
@@ -56,6 +60,10 @@ def drawWorldScene(cubes, name, size, lim, view=None):
             ax.plot3D([x1, x2], [y1, y2], [z1, z2], c='r', linewidth=2)
 
     plt.show()
+
+def draw3dsceneByViews(cubes, name, size, lim, views, camera):
+    for view in views:
+        draw3dscene(cubes, name, size, lim, view, camera)
 
 def draw3dscene(cubes, name, size, lim, view=None, camera=None):
     fig = plt.figure(figsize=(size[0], size[1]))

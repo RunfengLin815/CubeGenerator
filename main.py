@@ -12,8 +12,8 @@ if __name__ == "__main__":
     plot_size = [10, 10]
     views = [
         [30, -60],  # 默认
-        # [90, 0],  # 俯视
-        # [0, 0]  # 正视图
+        [90, 0],  # 俯视
+        [0, 0]  # 正视图
     ]
 
     cubes_size = [
@@ -52,7 +52,8 @@ if __name__ == "__main__":
     vs = getCubesVs(cubes)
     print("vs:\n", vs)
 
-    draw3dscene(vs, "world scene", plot_size, [0, 1], views[0], camera)
+    # draw3dscene(vs, "world scene", plot_size, [0, 1], views[0], camera)
+    draw3dsceneByViews(vs, "world scene", plot_size, [0, 1], views, camera)
 
     # 相机坐标
     vs_h = getHs(vs)
@@ -68,7 +69,7 @@ if __name__ == "__main__":
 
     drawWorldScene(vs_c, "camera scene", plot_size, [-1, 1], views[0])
 
-    # 图像坐标
+    # 图像
     trans2 = getTrans2(camera)
     print("trans2:\n", trans2)
 
@@ -76,7 +77,31 @@ if __name__ == "__main__":
     print("vs_i:\n", vs_i)
 
     limit_2d = [-0.002, 0.002, -0.002, 0.002]
-    draw2dscene(vs_i, "test", plot_size, lim=limit_2d)
+    # limit_2d = [-camera.reso[0], camera.reso[0], -camera.reso[1], camera.reso[1]]
+    draw2dscene(vs_i, "img scene", plot_size, lim=limit_2d)
+
+    # 像素坐标
+    trans2 = getTrans2BK(camera)
+    print("trans2:\n", trans2)
+
+    vs_i = fromCamera2Img(vs_c, trans2)
+    print("vs_i:\n", vs_i)
+
+    # limit_2d = [-0.002, 0.002, -0.002, 0.002]
+    limit_2d = [-camera.reso[0], camera.reso[0], -camera.reso[1], camera.reso[1]]
+    draw2dscene(vs_i, "voxel scene", plot_size, lim=limit_2d)
+
+
+
+    # # 像素
+    # trans3 = getTrans3(camera)
+    # print("trans3:\n", trans3)
+    #
+    # vs_i = fromCamera2Img(vs_c, trans3)
+    # print("vs_i:\n", vs_i)
+    #
+    # limit_2d = [-0.002, 0.002, -0.002, 0.002]
+    # draw2dscene(vs_i, "voxel scene", plot_size, lim=limit_2d)
 
 
     # 图像、像素一步到位
